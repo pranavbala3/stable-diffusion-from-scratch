@@ -12,6 +12,7 @@ class SelfAttention(nn.Module):
 
         # this is the weight matrix for the output
         self.out_proj = nn.Linear(model_dim, model_dim, bias=out_proj_bias)
+        
         self.heads = heads
         self.head_dim = model_dim // heads
 
@@ -44,6 +45,44 @@ class SelfAttention(nn.Module):
         output = weight @ value
         output = output.transpose(1, 2)
         output = output.reshape(x.shape)
+        output = self.out_proj(output)
+
+        return output
+    
+# attention that gets queries from latent  and keys and values from context
+class CrossAttention(nn.Module):
+    def __init__(self, heads, embed_dim, cross_dim, in_proj_bias=True, out_proj_bias=True):
+        super().__init__()
+        self.q_proj = nn.Linear(embed_dim, embed_dim, bias=in_proj_bias)
+        self.k_proj = nn.Linear(cross_dim, embed_dim, bias=in_proj_bias)
+        self.v_proj = nn.Linear(cross_dim, embed_dim, bias=in_proj_bias)
+        self.out_proj = nn.Linear(embed_dim, embed_dim, bias=in_proj_bias)
+        self.heads = heads
+        self.head_dim = embed_dim // heads
+
+        
+    def forward(self, x, y):
+        # x (latent): (Batch_Size, Seq_Len_Q, Dim_Q)
+        # y (context): (Batch_Size, Seq_Len_KV, Dim_KV) = (Batch_Size, 77, 768)
+        batch_size, seq_len, embed_dim = x.shape
+
+        new_shape = (batch_size, -1, self.heads, self.head_dim)
+
+        query = self.q_proj(x)
+        key = self.k_proj(y)
+        value = self.v_proj(y)
+
+        query = query.view(new_shape).transpose(1, 2)
+        key = key.view(new_shape).transpose(1, 2)
+        value = value.view(new_shape).transpose(1, 2)
+
+        weight = query @ key.transpose(-1, -2)
+        weight /= math.sqrt(self.head_dim)
+        weight = F.softmax(weight)
+
+        output = weight @ value
+        output = output.transpose(1, 2)
+        output = output.shape(x.shape)
         output = self.out_proj(output)
 
         return output

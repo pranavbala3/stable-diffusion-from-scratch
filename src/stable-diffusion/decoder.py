@@ -6,7 +6,7 @@ from attention import SelfAttention
 class VAE_AttentionBlock(nn.Module):
     def __init__(self, channels):
         super().__init__()
-        self.group_norm1 = nn.GrpupNorm(num_groups=32, num_channels=channels)
+        self.group_norm = nn.GroupNorm(num_groups=32, num_channels=channels)
         self.attention = SelfAttention(1, channels)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -14,6 +14,7 @@ class VAE_AttentionBlock(nn.Module):
         residual = x
         n, c, h, w = x.shape()
 
+        x = self.group_norm(x)
         # (Batch_Size, Features, Height, Width) -> (Batch_Size, Features, Height * Width)
         x = x.view(n, c, w * h)
         # (Batch_Size, Features, Height * Width) -> (Batch_Size, Height * Width, Features)
@@ -33,7 +34,7 @@ class VAE_ResidualBlock(nn.Module):
         self.conv1 = nn.Conv2d(in_channels=in_channels, out_channels=out_channels, kernel_size=3, padding=1)
 
         self.group_norm2 = nn.GroupNorm(num_groups=32, num_channels=out_channels)
-        self.conv2 = nn.Conv2d(in_channels=out_channels, out_channels=out_channels, kernel_size=1, padding=0)
+        self.conv2 = nn.Conv2d(in_channels=out_channels, out_channels=out_channels, kernel_size=3, padding=1)
 
         if in_channels == out_channels:
             self.res_layer = nn.Identity()
@@ -100,12 +101,12 @@ class Decoder(nn.Module):
 
         )
 
-        def forward(self, x: torch.Tensor) -> torch.Tensor:
-            # x: (Batch_Size, 4, Height / 8, Width / 8)
-            x /= 0.18215
-            for module in self:
-                x = module(x)          
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        # x: (Batch_Size, 4, Height / 8, Width / 8)
+        x /= 0.18215
+        for module in self:
+            x = module(x)          
 
-            # (Batch_Size, 3, Height, Width)
-            return x
+        # (Batch_Size, 3, Height, Width)
+        return x
     
