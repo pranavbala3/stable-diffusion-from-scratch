@@ -1,4 +1,5 @@
 .venv
 .DS_store
 src/data
-src/stable-diffusion/data
+src/stable_diffusion/data
+src/stable_diffusion/__pycache__

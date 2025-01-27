@@ -16,28 +16,21 @@ class Encoder(nn.Sequential):
             VAE_ResidualBlock(128, 128),
 
             # (Batch_Size, 128, Height, Width) -> (Batch_Size, 128, Height / 2, Width / 2)
-            nn.conv2d(in_channels=128, out_channels=128, kernel_size=3, padding=0, stride=2),
+            nn.Conv2d(in_channels=128, out_channels=128, kernel_size=3, padding=0, stride=2),
             
             # (Batch_Size, 128, Height / 2, Width / 2) -> (Batch_Size, 256, Height / 2, Width / 2)
             VAE_ResidualBlock(128, 256),
             VAE_ResidualBlock(256, 256),
 
             # (Batch_Size, 256, Height / 2, Width / 2) -> (Batch_Size, 256, Height / 4, Width / 4)
-            nn.conv2d(in_channels=256, out_channels=256, kernel_size=3, padding=0, stride=2),
+            nn.Conv2d(in_channels=256, out_channels=256, kernel_size=3, padding=0, stride=2),
             
             # (Batch_Size, 256, Height / 4, Width / 4) -> (Batch_Size, 512, Height / 4, Width / 4)
             VAE_ResidualBlock(256, 512),
             VAE_ResidualBlock(512, 512),
 
             # (Batch_Size, 512, Height / 4, Width / 4) -> (Batch_Size, 512, Height / 8, Width / 8)
-            nn.conv2d(in_channels=256, out_channels=256, kernel_size=3, padding=0, stride=2),
-            
-            # (Batch_Size, 512, Height / 8, Width / 8) -> (Batch_Size, 512, Height / 8, Width / 8)
-            VAE_ResidualBlock(256, 512),
-            VAE_ResidualBlock(512, 512),
-
-            # (Batch_Size, 512, Height / 8, Width / 8) -> (Batch_Size, 512, Height / 8, Width / 8)
-            nn.conv2d(in_channels=512, out_channels=512, kernel_size=3, padding=0, stride=2),
+            nn.Conv2d(in_channels=512, out_channels=512, kernel_size=3, padding=0, stride=2),
             
             # (Batch_Size, 512, Height / 8, Width / 8) -> (Batch_Size, 512, Height / 8, Width / 8)
             VAE_ResidualBlock(512, 512),
@@ -56,10 +49,10 @@ class Encoder(nn.Sequential):
             nn.SiLU(),
 
             # (Batch_Size, 512, Height / 8, Width / 8) -> (Batch_Size, 8, Height / 8, Width / 8)
-            nn.conv2d(in_channels=512, out_channels=8, kernel_size=3, padding=1),
+            nn.Conv2d(in_channels=512, out_channels=8, kernel_size=3, padding=1),
 
             # (Batch_Size, 8, Height / 8, Width / 8) -> (Batch_Size, 8, Height / 8, Width / 8)        
-            nn.conv2d(in_channels=8, out_channels=8, kernel_size=1, padding=0),
+            nn.Conv2d(in_channels=8, out_channels=8, kernel_size=1, padding=0),
         )
 
     def forward(self, x: torch.Tensor, noise: torch.Tensor) -> torch.Tensor:

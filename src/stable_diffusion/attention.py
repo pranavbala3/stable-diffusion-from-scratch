@@ -8,7 +8,7 @@ class SelfAttention(nn.Module):
         super().__init__()
 
         # these are the weight matrices for q, k, v
-        self.in_project = nn.Linear(model_dim, 3 * model_dim, bias=in_proj_bias)
+        self.in_proj = nn.Linear(model_dim, 3 * model_dim, bias=in_proj_bias)
 
         # this is the weight matrix for the output
         self.out_proj = nn.Linear(model_dim, model_dim, bias=out_proj_bias)
@@ -22,7 +22,7 @@ class SelfAttention(nn.Module):
         batch_size, seq_len, model_dim = x.shape
         
         # (Batch_Size, seq_len, model_dim) -> (Batch_Size, seq_len, model_dim * 3) -> 3 x (Batch_Size, seq_len, model_dim)
-        query, key, value = self.in_project(x).chunk(3, dim=-1)
+        query, key, value = self.in_proj(x).chunk(3, dim=-1)
 
         new_shape = (batch_size, seq_len, self.heads, self.head_dim)
 
@@ -56,7 +56,7 @@ class CrossAttention(nn.Module):
         self.q_proj = nn.Linear(embed_dim, embed_dim, bias=in_proj_bias)
         self.k_proj = nn.Linear(cross_dim, embed_dim, bias=in_proj_bias)
         self.v_proj = nn.Linear(cross_dim, embed_dim, bias=in_proj_bias)
-        self.out_proj = nn.Linear(embed_dim, embed_dim, bias=in_proj_bias)
+        self.out_proj = nn.Linear(embed_dim, embed_dim, bias=out_proj_bias)
         self.heads = heads
         self.head_dim = embed_dim // heads
 
@@ -81,8 +81,8 @@ class CrossAttention(nn.Module):
         weight = F.softmax(weight)
 
         output = weight @ value
-        output = output.transpose(1, 2)
-        output = output.shape(x.shape)
+        output = output.transpose(1, 2).contiguous()
+        output = output.view(x.shape)
         output = self.out_proj(output)
 
         return output

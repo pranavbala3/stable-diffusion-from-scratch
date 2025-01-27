@@ -3,7 +3,7 @@ from torch import nn
 from torch.nn import functional as F
 from attention import SelfAttention
 
-class CLIPEmbedding(nn.Module):
+class PromptEmbedding(nn.Module):
     def __init__(self, vocab_len, embed_len, token_len):
         super().__init__()
         self.token_embedding = nn.Embedding(vocab_len, embed_len)
@@ -35,7 +35,7 @@ class CLIPLayer(nn.Module):
         residue2 = x
         x = self.layer_norm2(x)
         x = self.linear1(x)
-        x = x * self.sigmoid(1.702 * x) # QuickGeLU
+        x = x * torch.sigmoid(1.702 * x) # QuickGeLU
         x = self.linear2(x)
         x += residue2
 
@@ -44,8 +44,9 @@ class CLIPLayer(nn.Module):
 
 class CLIP(nn.Module):
     def __init__(self):
-        self.embedding = CLIPEmbedding(49408, 768, 77)
-        self.layers = nn.Module([
+        super().__init__()
+        self.embedding = PromptEmbedding(49408, 768, 77)
+        self.layers = nn.ModuleList([
             CLIPLayer(12, 768) for i in range(12)
         ])
 
