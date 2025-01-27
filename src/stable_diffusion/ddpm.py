@@ -12,6 +12,7 @@ class DDPMSampler:
 
         # alphas to get to any time step
         self.alphas = 1.0 - self.betas
+        
         self.cumprod_alphas = torch.cumprod(self.alphas, 0) # [a_0, a_0 * a_1, a_0 * a_1 * a_2, ...]
         self.one = torch.tensor(1.0)
         self.generator = generator
@@ -73,7 +74,7 @@ class DDPMSampler:
         pred_original_sample_coeff = (alpha_prod_t_prev ** (0.5) * current_beta_t) / beta_prod_t
         current_sample_coeff = current_alpha_t ** (0.5) * beta_prod_t_prev / beta_prod_t
 
-        # compute predicted previous sample µ_t, formula 7 in DDPM paper
+        # compute predicted previous sample mu_t, formula 7 in DDPM paper
         pred_prev_sample = pred_original_sample_coeff * pred_original_sample + current_sample_coeff * latents
 
         # add noise
