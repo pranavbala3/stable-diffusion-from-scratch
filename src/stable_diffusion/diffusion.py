@@ -66,7 +66,7 @@ class UNET_AttentionBlock(nn.Module):
         super().__init__()
         channels = heads * embed_len
 
-        self.group_norm = nn.GroupNorm(num_groups=32, num_channels=channels, eps=1e-16)
+        self.group_norm = nn.GroupNorm(num_groups=32, num_channels=channels, eps=1e-6)
         self.conv1 = nn.Conv2d(in_channels=channels, out_channels=channels, kernel_size=1, padding=0)
 
         self.layer_norm1 = nn.LayerNorm(channels)

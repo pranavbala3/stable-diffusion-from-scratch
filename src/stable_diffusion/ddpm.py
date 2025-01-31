@@ -13,7 +13,7 @@ class DDPMSampler:
         # alphas to get to any time step
         self.alphas = 1.0 - self.betas
         
-        self.cumprod_alphas = torch.cumprod(self.alphas, 0) # [a_0, a_0 * a_1, a_0 * a_1 * a_2, ...]
+        self.cumprod_alphas = torch.cumprod(self.alphas, dim=0) # [a_0, a_0 * a_1, a_0 * a_1 * a_2, ...]
         self.one = torch.tensor(1.0)
         self.generator = generator
         self.training_steps = training_steps

@@ -74,7 +74,7 @@ class Encoder(nn.Sequential):
         log_var = torch.clamp(log_var, min=-30.0, max=20.0)
         var = torch.exp(log_var)
 
-        std = torch.sqrt(var)
+        std = var.sqrt()
 
         x = mu + std * noise
         x *= 0.18215

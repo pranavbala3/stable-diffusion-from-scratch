@@ -78,7 +78,7 @@ class CrossAttention(nn.Module):
 
         weight = query @ key.transpose(-1, -2)
         weight /= math.sqrt(self.head_dim)
-        weight = F.softmax(weight)
+        weight = F.softmax(weight, dim=-1)
 
         output = weight @ value
         output = output.transpose(1, 2).contiguous()
